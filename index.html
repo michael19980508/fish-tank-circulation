@@ -1,44 +1,47 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>魚缸水循環計算器</title>
   <style>
     body {
       font-family: "Noto Sans TC", sans-serif;
-      background: #fefbf3;
+      background: #fffaf0;
       color: #333;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       height: 100vh;
       margin: 0;
     }
+    .container {
+      background: #fff9ef;
+      padding: 35px 45px;
+      border-radius: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 340px;
+    }
     h1 {
       color: #d17b0f;
-      margin-bottom: 20px;
-    }
-    .container {
-      background: #fffaf0;
-      padding: 30px 40px;
-      border-radius: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
     }
     label {
       display: block;
-      margin-top: 10px;
+      margin-top: 12px;
+      text-align: left;
+      font-weight: 500;
     }
     input {
-      width: 200px;
+      width: 100%;
       padding: 8px;
-      margin-top: 5px;
       border-radius: 8px;
       border: 1px solid #ccc;
+      margin-top: 5px;
     }
     button {
-      margin-top: 20px;
+      margin-top: 25px;
       padding: 10px 25px;
       background: #ffa733;
       border: none;
@@ -51,43 +54,90 @@
       background: #ff8a00;
     }
     .result {
-      margin-top: 20px;
+      margin-top: 25px;
       font-size: 18px;
       color: #333;
+      text-align: left;
+    }
+    .note {
+      font-size: 13px;
+      color: #777;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>魚缸水循環計算器</h1>
-    <label>10 秒出水量（公升）：
-      <input type="number" id="flow10s" placeholder="例如：2.5">
+
+    <label>量測秒數（秒）：
+      <input type="number" id="seconds" placeholder="例如：10">
     </label>
-    <label>魚缸總水量（公升）：
-      <input type="number" id="tankVolume" placeholder="例如：100">
+
+    <label>出水量（毫升 ml）：
+      <input type="number" id="flowMl" placeholder="例如：2500">
     </label>
+
+    <hr style="margin:20px 0; border:none; border-top:1px solid #eee;">
+
+    <label>魚缸長（公分）：
+      <input type="number" id="length" placeholder="例如：100">
+    </label>
+    <label>魚缸寬（公分）：
+      <input type="number" id="width" placeholder="例如：40">
+    </label>
+    <label>魚缸高（公分）：
+      <input type="number" id="height" placeholder="例如：50">
+    </label>
+
+    <div class="note">或直接輸入體積（公升）：</div>
+    <input type="number" id="tankLiters" placeholder="例如：200">
+
     <button onclick="calculate()">計算循環次數</button>
+
     <div class="result" id="result"></div>
   </div>
 
   <script>
     function calculate() {
-      const flow10s = parseFloat(document.getElementById('flow10s').value);
-      const tankVolume = parseFloat(document.getElementById('tankVolume').value);
+      const seconds = parseFloat(document.getElementById('seconds').value);
+      const flowMl = parseFloat(document.getElementById('flowMl').value);
+      const length = parseFloat(document.getElementById('length').value);
+      const width = parseFloat(document.getElementById('width').value);
+      const height = parseFloat(document.getElementById('height').value);
+      let tankLiters = parseFloat(document.getElementById('tankLiters').value);
       const resultDiv = document.getElementById('result');
 
-      if (isNaN(flow10s) || isNaN(tankVolume) || flow10s <= 0 || tankVolume <= 0) {
-        resultDiv.innerHTML = "請輸入正確的數值";
+      // 檢查輸入
+      if (isNaN(seconds) || isNaN(flowMl) || seconds <= 0 || flowMl <= 0) {
+        resultDiv.innerHTML = "請輸入正確的出水數據";
         return;
       }
 
-      const hourlyFlow = flow10s * 360; // 一小時的出水量 (公升)
-      const circulation = hourlyFlow / tankVolume;
+      // 若沒輸入體積，嘗試用長寬高算
+      if (isNaN(tankLiters) && !isNaN(length) && !isNaN(width) && !isNaN(height)) {
+        tankLiters = length * width * height / 1000; // cm³ → L
+      }
+
+      if (isNaN(tankLiters) || tankLiters <= 0) {
+        resultDiv.innerHTML = "請輸入魚缸長寬高或體積（L）";
+        return;
+      }
+
+      // 計算每秒流量（L/s）
+      const flowLps = flowMl / 1000 / seconds;
+
+      // 每小時出水量
+      const hourlyFlow = flowLps * 3600; // L/hr
+
+      // 循環次數
+      const circulation = hourlyFlow / tankLiters;
 
       resultDiv.innerHTML = `
-        每小時出水量：約 <b>${hourlyFlow.toFixed(1)}</b> 公升<br>
-        魚缸水量：約 <b>${tankVolume.toFixed(1)}</b> 公升<br>
-        ➤ 每小時循環次數：約 <b>${circulation.toFixed(2)}</b> 次
+        💧 每秒流量：約 <b>${flowLps.toFixed(3)}</b> L/s<br>
+        ⏳ 每小時出水量：約 <b>${hourlyFlow.toFixed(1)}</b> L/hr<br>
+        🐠 魚缸水量：約 <b>${tankLiters.toFixed(1)}</b> L<br>
+        🔁 每小時循環次數：約 <b>${circulation.toFixed(2)}</b> 次
       `;
     }
   </script>
