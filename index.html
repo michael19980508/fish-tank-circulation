@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>魚缸水循環計算器</title>
+  <style>
+    body {
+      font-family: "Noto Sans TC", sans-serif;
+      background: #fefbf3;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      color: #d17b0f;
+      margin-bottom: 20px;
+    }
+    .container {
+      background: #fffaf0;
+      padding: 30px 40px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input {
+      width: 200px;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 25px;
+      background: #ffa733;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #ff8a00;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>魚缸水循環計算器</h1>
+    <label>10 秒出水量（公升）：
+      <input type="number" id="flow10s" placeholder="例如：2.5">
+    </label>
+    <label>魚缸總水量（公升）：
+      <input type="number" id="tankVolume" placeholder="例如：100">
+    </label>
+    <button onclick="calculate()">計算循環次數</button>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    function calculate() {
+      const flow10s = parseFloat(document.getElementById('flow10s').value);
+      const tankVolume = parseFloat(document.getElementById('tankVolume').value);
+      const resultDiv = document.getElementById('result');
+
+      if (isNaN(flow10s) || isNaN(tankVolume) || flow10s <= 0 || tankVolume <= 0) {
+        resultDiv.innerHTML = "請輸入正確的數值";
+        return;
+      }
+
+      const hourlyFlow = flow10s * 360; // 一小時的出水量 (公升)
+      const circulation = hourlyFlow / tankVolume;
+
+      resultDiv.innerHTML = `
+        每小時出水量：約 <b>${hourlyFlow.toFixed(1)}</b> 公升<br>
+        魚缸水量：約 <b>${tankVolume.toFixed(1)}</b> 公升<br>
+        ➤ 每小時循環次數：約 <b>${circulation.toFixed(2)}</b> 次
+      `;
+    }
+  </script>
+</body>
+</html>
